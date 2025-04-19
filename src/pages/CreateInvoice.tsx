@@ -16,8 +16,47 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import { Invoice } from '../types/invoice';
 import { invoiceService } from '../services/api';
+
+// Placeholder data for clients
+const clientData = {
+  'individual': {
+    service_description: 'SERVICIO DE LIMPIEZA Y MANTENIMIENTO DEL PÁRKING',
+    address: 'Moscu #2, Barcelona',
+    total_price: '150.00',
+    payment_condition: 'CONTADO',
+    payment_method: 'Transferencia bancaria',
+    account_number: 'ES91 2100 0418 4502 0005 1332',
+    iban: 'ES91 2100 0418 4502 0005 1332',
+    net_amount: '150.00',
+    vat: '31.50',
+    total_amount: '181.50'
+  },
+  'company': {
+    service_description: 'Servicios de limpieza mensual',
+    address: 'Moscu #4, Barcelona',
+    total_price: '200.00',
+    payment_condition: 'CONTADO',
+    payment_method: 'Transferencia bancaria',
+    account_number: 'ES91 2100 0418 4502 0005 1332',
+    iban: 'ES91 2100 0418 4502 0005 1332',
+    net_amount: '200.00',
+    vat: '42.00',
+    total_amount: '242.00'
+  },
+  'freelancer': {
+    service_description: 'Servicios de limpieza mensual',
+    address: 'Moscu #6, Barcelona',
+    total_price: '180.00',
+    payment_condition: 'CONTADO',
+    payment_method: 'Transferencia bancaria',
+    account_number: 'ES91 2100 0418 4502 0005 1332',
+    iban: 'ES91 2100 0418 4502 0005 1332',
+    net_amount: '180.00',
+    vat: '37.80',
+    total_amount: '217.80'
+  }
+};
 
 const validationSchema = Yup.object({
   client_type: Yup.string().required('Client type is required'),
@@ -36,12 +75,25 @@ const validationSchema = Yup.object({
   net_amount: Yup.string().required('Net amount is required'),
   vat: Yup.string().required('VAT is required'),
   total_amount: Yup.string().required('Total amount is required'),
-  nif: Yup.string().required('NIF is required'),
 });
 
-type FormValues = Omit<Invoice, 'invoice_number'> & {
-  invoice_number: string;
+type FormValues = {
   client_type: string;
+  invoice_number: string;
+  invoice_date: string;
+  service_description: string;
+  address: string;
+  month: string;
+  price_per_hour: string;
+  total_price: string;
+  payment_condition: string;
+  due_date: string;
+  payment_method: string;
+  account_number: string;
+  iban: string;
+  net_amount: string;
+  vat: string;
+  total_amount: string;
 };
 
 const CreateInvoice = () => {
@@ -69,7 +121,6 @@ const CreateInvoice = () => {
       net_amount: '',
       vat: '',
       total_amount: '',
-      nif: '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -92,6 +143,19 @@ const CreateInvoice = () => {
       }
     },
   });
+
+  const handleClientChange = (event: any) => {
+    const clientType = event.target.value;
+    formik.setFieldValue('client_type', clientType);
+    
+    // When API is implemented, this will be replaced with an API call
+    const clientInfo = clientData[clientType as keyof typeof clientData];
+    if (clientInfo) {
+      Object.entries(clientInfo).forEach(([key, value]) => {
+        formik.setFieldValue(key, value);
+      });
+    }
+  };
 
   return (
     <Box sx={{ 
@@ -140,13 +204,12 @@ const CreateInvoice = () => {
                 id="client_type"
                 name="client_type"
                 value={formik.values.client_type}
-                onChange={formik.handleChange}
+                onChange={handleClientChange}
                 label="Cliente"
               >
                 <MenuItem value="individual">Moscu #2</MenuItem>
                 <MenuItem value="company">Moscu #4</MenuItem>
                 <MenuItem value="freelancer">Moscu #6</MenuItem>
-                <MenuItem value="freelancer">Ramon Trias Fargas #15</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -231,7 +294,7 @@ const CreateInvoice = () => {
               fullWidth
               id="price_per_hour"
               name="price_per_hour"
-              label="Precio por Hora"
+              label="Precio por Hora (Opcional)"
               value={formik.values.price_per_hour}
               onChange={formik.handleChange}
               error={formik.touched.price_per_hour && Boolean(formik.errors.price_per_hour)}

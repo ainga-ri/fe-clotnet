@@ -14,5 +14,4 @@ export interface Invoice {
   net_amount: string;
   vat: string;
   total_amount: string;
-  nif: string;
 } 
