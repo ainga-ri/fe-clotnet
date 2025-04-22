@@ -13,7 +13,7 @@ const api = axios.create({
 export const invoiceService = {
   createInvoice: async (invoice: Invoice) => {
     try {
-      const response = await api.post('/invoices', invoice);
+      const response = await api.post('/v1/invoices/generate', invoice);
       return response.data;
     } catch (error) {
       throw error;
